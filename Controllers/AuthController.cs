@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -38,17 +39,14 @@ namespace zmgTestBack.Controllers
             var secretKey = _configuration.GetValue<string>("SecretKey");
             var key = Encoding.ASCII.GetBytes(secretKey);
 
-            // Creamos los claims (pertenencias, características) del usuario
-            var claims = new[]
-            {
-            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-            new Claim(ClaimTypes.Email, user.Email)
-            };
-
+            List<Claim> lstClaims = new List<Claim>();
+            lstClaims.Add(new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()));
+            lstClaims.Add(new Claim(ClaimTypes.Email, user.Email));
             foreach (UsersRole usersRole in user.UsersRoles)
-            {
-                claims.Append(new Claim(ClaimTypes.Role, usersRole.RoleId.ToString()));
-            }
+                lstClaims.Add(new Claim(ClaimTypes.Role, usersRole.RoleId.ToString()));
+            
+            // Creamos los claims (pertenencias, características) del usuario
+            var claims = lstClaims.ToArray();
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

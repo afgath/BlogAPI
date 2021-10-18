@@ -160,13 +160,17 @@ namespace zmgTestBack.Services
                 .ToListAsync();
         }
 
-        public async Task<Post> GetPostById(decimal postId)
+        public async Task<Post> GetPostById(decimal postId, decimal userId)
         {
             Post post = _dbContext.Posts
-                .Include("Comments")
+                .Include(x => x.Comments.Where(y => !y.IsReview && y.Status == (int)StatusEnums.Published))
                 .Include("Comments.CreationUser")
                 .Include("CreationUser")
-                .SingleOrDefault(x => x.PostId == postId && x.Status == (int)StatusEnums.Published);
+                .SingleOrDefault(x => x.PostId == postId && ((x.CreationUserId != userId && x.Status == (int)StatusEnums.Published) || x.CreationUserId == userId));
+            if (post.CreationUserId == userId)
+            {
+               post.Comments.Concat(await _dbContext.Comments.Include("CreationUser").Where(x => x.IsReview && x.Status == (int)StatusEnums.Published).ToListAsync());
+            }
 
             post.Views += 1;
             _dbContext.Posts.Update(post);
@@ -201,9 +205,26 @@ namespace zmgTestBack.Services
             return post;
         }
 
-        public Task<List<Post>> GetPostsByUser()
+        public async Task<List<Post>> GetPostsByUser(decimal userId)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Posts.Include("CreationUser")
+                .OrderByDescending(x => x.PostId)
+                .Where(x => x.CreationUserId == userId && x.Status != (int)StatusEnums.Deleted)
+                .Select(x => new Post()
+                {
+                    PostId = x.PostId,
+                    Title = x.Title,
+                    Contents = x.Contents.Substring(0, 100) + "...",
+                    CreationDate = x.CreationDate,
+                    ModificationDate = x.ModificationDate,
+                    CreationUser = new User()
+                    {
+                        UserId = x.CreationUser.UserId,
+                        Name = x.CreationUser.Name,
+                        Username = x.CreationUser.Username
+                    }
+                })
+                .ToListAsync();
         }
 
         public async Task LikeComment(decimal commentId)
@@ -237,14 +258,14 @@ namespace zmgTestBack.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task UpdatePost(PostRequest post)
+        public async Task UpdatePost(PostRequest post, decimal userId)
         {
-            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == post.PostId && x.Status == (int)StatusEnums.Rejected);
+            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.CreationUserId == userId && x.PostId == post.PostId && x.Status == (int)StatusEnums.Rejected);
             if(postToUpdate == null)
                 throw new ArgumentNullException(String.Format("The post with the id: {0} doesn't exist or can't be modified", post.PostId));
             postToUpdate.Title = post.Title;
             postToUpdate.Contents = post.Contents;
-            postToUpdate.ModificationUserId = post.ModificationUserId;
+            postToUpdate.ModificationUserId = userId;
             postToUpdate.ModificationDate = DateTime.UtcNow;
             postToUpdate.Status = (int)StatusEnums.PendingApproval;
             _dbContext.Posts.Update(postToUpdate);

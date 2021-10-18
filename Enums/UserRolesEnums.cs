@@ -12,4 +12,11 @@ namespace zmgTestBack.Models
         Viewer = 3
 
     }
+
+    public static class RolesConstants
+    {
+        public const string Editor = "1";
+        public const string Writer = "2";
+        public const string Viewer = "3";
+    }
 }

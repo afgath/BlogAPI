@@ -62,6 +62,33 @@ namespace zmgTestBack
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
+
+                // Bearer token authentication
+                OpenApiSecurityScheme securityDefinition = new OpenApiSecurityScheme()
+                {
+                    Name = "Bearer",
+                    BearerFormat = "JWT",
+                    Scheme = "bearer",
+                    Description = "Specify the authorization token.",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                };
+                c.AddSecurityDefinition("jwt_auth", securityDefinition);
+
+                // Make sure swagger UI requires a Bearer token specified
+                OpenApiSecurityScheme securityScheme = new OpenApiSecurityScheme()
+                {
+                    Reference = new OpenApiReference()
+                    {
+                        Id = "jwt_auth",
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+                OpenApiSecurityRequirement securityRequirements = new OpenApiSecurityRequirement()
+                {
+                    {securityScheme, new string[] { }},
+                };
+                c.AddSecurityRequirement(securityRequirements);
             });
             //Ignore Circular relationships.
             services.AddControllers().AddNewtonsoftJson(options =>
@@ -78,10 +105,10 @@ namespace zmgTestBack
                 app.UseDeveloperExceptionPage();
             }
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
             app.UseSwagger();
-            app.UseAuthentication();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");

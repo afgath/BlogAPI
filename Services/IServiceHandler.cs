@@ -9,12 +9,12 @@ namespace zmgTestBack.Services
     /// </summary>
     public interface IServiceHandler
     {
-        Task<Post> GetPostById(decimal postId);
+        Task<Post> GetPostById(decimal postId, decimal userId);
         Task<List<Post>> GetAllPosts();
-        Task<List<Post>> GetPostsByUser();
+        Task<List<Post>> GetPostsByUser(decimal userId);
         Task<List<Post>> GetPendingPosts();
         Task CreatePost(PostRequest post);
-        Task UpdatePost(PostRequest post);
+        Task UpdatePost(PostRequest post, decimal userId);
         Task DeletePost(decimal postId);
         Task CreateComment(CommentRequest comment);
         Task DeleteComment(decimal commentId);
