@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,9 +15,9 @@ namespace zmgTestBack.Services
         {
             _dbContext = dbContext;
         }
-        public User LogIn(User user)
+        public User LogIn(UserRequest user)
         {
-            User resultUser = _dbContext.Users.SingleOrDefault(x => x.Username == user.Username && x.Password == user.Password);
+            User resultUser = _dbContext.Users.Include("UsersRoles").SingleOrDefault(x => x.Username == user.Username && x.Password == user.Password);
             if(resultUser == null)
                 throw new ArgumentNullException(String.Format("The user does not exist"));
             return resultUser;

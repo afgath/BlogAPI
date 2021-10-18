@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using zmgTestBack.Filters;
@@ -26,7 +27,7 @@ namespace zmgTestBack.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public IActionResult Login(User model)
+        public IActionResult Login(UserRequest model)
         {
             // Tu código para validar que el usuario ingresado es válido
 
@@ -42,7 +43,12 @@ namespace zmgTestBack.Controllers
             {
             new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
             new Claim(ClaimTypes.Email, user.Email)
-        };
+            };
+
+            foreach (UsersRole usersRole in user.UsersRoles)
+            {
+                claims.Append(new Claim(ClaimTypes.Role, usersRole.RoleId.ToString()));
+            }
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

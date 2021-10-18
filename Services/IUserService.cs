@@ -8,6 +8,6 @@ namespace zmgTestBack.Services
 {
     public interface IUserService
     {
-        User LogIn(User user);
+        User LogIn(UserRequest user);
     }
 }

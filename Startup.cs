@@ -50,6 +50,7 @@ namespace zmgTestBack
             services.AddMvc();
 
             services.AddScoped<IServiceHandler, ServiceHandler>();
+            services.AddScoped<IUserService, UserService>();
             services.AddDbContext<ZmgTestDbContext>(options => options
             .UseSqlServer
             (Configuration.GetConnectionString("DefaultConnection")));
