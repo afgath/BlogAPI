@@ -27,14 +27,14 @@ namespace zmgTestBack.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task CreateComment(CommentRequest comment)
+        public async Task CreateComment(CommentRequest comment, decimal userId)
         {
             int repeatedComments = _dbContext.Comments
-                .Where(x => x.Status == (int)StatusEnums.Published && x.PostId == comment.PostId && x.CreationUser.UserId == comment.CreationUserId && x.Contents == comment.Contents).Count();
+                .Where(x => x.Status == (int)StatusEnums.Published && x.PostId == comment.PostId && x.CreationUser.UserId == userId && x.Contents == comment.Contents).Count();
             Post post = _dbContext.Posts
                 .SingleOrDefault(x => x.PostId == comment.PostId);
             User user = _dbContext.Users
-                .SingleOrDefault(x => x.UserId == comment.CreationUserId);
+                .SingleOrDefault(x => x.UserId == userId);
             if (repeatedComments > 2)
                 throw new DuplicateWaitObjectException("This comment couldn't be posted because you have already posted the same comment several times before.");
             if(post == null)
@@ -42,7 +42,7 @@ namespace zmgTestBack.Services
             Comment commentToSave = new Comment()
             {
                 Contents = comment.Contents,
-                CreationUserId = comment.CreationUserId,
+                CreationUserId = userId,
                 CreationDate = DateTime.UtcNow,
                 Likes = 0,
                 Dislikes = 0,
@@ -54,15 +54,15 @@ namespace zmgTestBack.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task CreatePost(PostRequest post)
+        public async Task CreatePost(PostRequest post, decimal userId)
         {
             Post postToSave = new Post() { 
             Title = post.Title,
             Contents = post.Contents,
             CreationDate = DateTime.UtcNow,
             ModificationDate = DateTime.UtcNow,
-            CreationUserId = post.CreationUserId,
-            ModificationUserId = post.CreationUserId,
+            CreationUserId = userId,
+            ModificationUserId = userId,
             Likes = 0,
             Dislikes = 0,
             Status = (int)StatusEnums.PendingApproval,
@@ -73,7 +73,7 @@ namespace zmgTestBack.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task DeleteComment(decimal commentId)
+        public async Task DeleteComment(decimal commentId, decimal userId)
         {
             Comment commentToDisable = _dbContext.Comments
                 .SingleOrDefault(x => x.CommentId == commentId && x.Status == (int)StatusEnums.Published);
@@ -84,7 +84,7 @@ namespace zmgTestBack.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task DeletePost(decimal postId)
+        public async Task DeletePost(decimal postId, decimal userId)
         {
             Post postToDisable = _dbContext.Posts
                 .SingleOrDefault(x => x.PostId == postId && x.Status != (int)StatusEnums.Deleted);
@@ -167,6 +167,9 @@ namespace zmgTestBack.Services
                 .Include("Comments.CreationUser")
                 .Include("CreationUser")
                 .SingleOrDefault(x => x.PostId == postId && ((x.CreationUserId != userId && x.Status == (int)StatusEnums.Published) || x.CreationUserId == userId));
+            if (post == null)
+                throw new ArgumentNullException(String.Format("There is no post with the id: {0}", postId));
+
             if (post.CreationUserId == userId)
             {
                post.Comments.Concat(await _dbContext.Comments.Include("CreationUser").Where(x => x.IsReview && x.Status == (int)StatusEnums.Published).ToListAsync());
@@ -197,10 +200,6 @@ namespace zmgTestBack.Services
                     comment.CreationUser.PostCreationUsers = null;
                     comment.CreationUser.CommentCreationUsers = null;
                 }
-            }
-            if (post == null)
-            {
-                throw new ArgumentNullException(String.Format("There is no post with the id: {0}", postId));
             }
             return post;
         }

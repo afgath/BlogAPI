@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using zmgTestBack.Constants;
 using zmgTestBack.Filters;
 using zmgTestBack.Models;
+using zmgTestBack.Models.Responses;
 using zmgTestBack.Services;
 
 namespace zmgTestBack.Controllers
@@ -64,15 +66,19 @@ namespace zmgTestBack.Controllers
         [Authorize(Roles = RolesConstants.Writer)]
         public async Task<IActionResult> CreatePost([FromBody] PostRequest post)
         {
-            await _serviceHandler.CreatePost(post);
-            return Ok();
+            decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _serviceHandler.CreatePost(post, userId);
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.Created, string.Format(ResponseConstants.Created, nameof(post)));
+            return Ok(response);
         }
         [HttpPost("createComment")]
         [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor + "," + RolesConstants.Viewer)]
         public async Task<IActionResult> CreateComment([FromBody] CommentRequest comment)
         {
-            await _serviceHandler.CreateComment(comment);
-            return Ok();
+            decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _serviceHandler.CreateComment(comment, userId);
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Created, nameof(comment)));
+            return Ok(response);
         }
         #endregion
 
@@ -83,49 +89,56 @@ namespace zmgTestBack.Controllers
         {
             decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             await _serviceHandler.UpdatePost(post, userId);
-            return Ok();
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Updated, nameof(post)));
+            return Ok(response);
         }
         [HttpPut("rejectPost/{postId}")]
         [Authorize(Roles = RolesConstants.Editor)]
         public async Task<IActionResult> RejectPost(decimal postId)
         {
             await _serviceHandler.RejectPost(postId);
-            return Ok();
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Reject, nameof(Post)));
+            return Ok(response);
         }
         [HttpPut("approvePost/{postId}")]
         [Authorize(Roles = RolesConstants.Editor)]
         public async Task<IActionResult> ApprovePost(decimal postId)
         {
             await _serviceHandler.ApprovePost(postId);
-            return Ok();
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Approve, nameof(Post)));
+            return Ok(response);
         }
         [HttpPut("likePost/{postId}")]
         [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor + "," + RolesConstants.Viewer)]
         public async Task<IActionResult> LikePost(decimal postId)
         {
             await _serviceHandler.LikePost(postId);
-            return Ok();
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Updated, nameof(Post)));
+            return Ok(response);
         }
         [HttpPut("dislikePost/{postId}")]
         [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor + "," + RolesConstants.Viewer)]
         public async Task<IActionResult> DislikePost(decimal postId)
         {
             await _serviceHandler.DislikePost(postId);
-            return Ok();
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Updated, nameof(Post)));
+            return Ok(response);
         }
         [HttpPut("likeComment/{commentId}")]
         [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor + "," + RolesConstants.Viewer)]
         public async Task<IActionResult> LikeComment(decimal commentId)
         {
             await _serviceHandler.LikeComment(commentId);
-            return Ok();
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Updated, nameof(Comment)));
+            return Ok(response);
         }
         [HttpPut("dislikeComment/{commentId}")]
         [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor + "," + RolesConstants.Viewer)]
         public async Task<IActionResult> DislikeComment(decimal commentId)
         {
             await _serviceHandler.DislikeComment(commentId);
-            return Ok();
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Updated, nameof(Comment)));
+            return Ok(response);
         }
 
         #endregion
@@ -135,17 +148,19 @@ namespace zmgTestBack.Controllers
         [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor + "," + RolesConstants.Viewer)]
         public async Task<IActionResult> DeletePost(decimal postId)
         {
-            //TODO: Solo el dueño
-            await _serviceHandler.DeletePost(postId);
-            return Ok();
+            decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _serviceHandler.DeletePost(postId, userId);
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Delete, nameof(Post)));
+            return Ok(response);
         }
         [HttpDelete("deleteComment/{commentId}")]
         [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor + "," + RolesConstants.Viewer)]
         public async Task<IActionResult> DeleteComment(decimal commentId)
         {
-            //TODO: Solo el dueño
-            await _serviceHandler.DeleteComment(commentId);
-            return Ok();
+            decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _serviceHandler.DeleteComment(commentId, userId);
+            GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Delete, nameof(Comment)));
+            return Ok(response);
         }
         #endregion
     }

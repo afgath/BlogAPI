@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using zmgTestBack.Filters;
+using zmgTestBack.Helpers;
 using zmgTestBack.Models;
 using zmgTestBack.Services;
 
@@ -59,8 +60,8 @@ namespace zmgTestBack.Controllers
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var createdToken = tokenHandler.CreateToken(tokenDescriptor);
-
-            return Ok(tokenHandler.WriteToken(createdToken));
+            TokenHelper token = new TokenHelper() { Token = tokenHandler.WriteToken(createdToken) };
+            return Ok(token);
         }
     }
 }

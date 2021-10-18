@@ -13,11 +13,11 @@ namespace zmgTestBack.Services
         Task<List<Post>> GetAllPosts();
         Task<List<Post>> GetPostsByUser(decimal userId);
         Task<List<Post>> GetPendingPosts();
-        Task CreatePost(PostRequest post);
+        Task CreatePost(PostRequest post, decimal userId);
         Task UpdatePost(PostRequest post, decimal userId);
-        Task DeletePost(decimal postId);
-        Task CreateComment(CommentRequest comment);
-        Task DeleteComment(decimal commentId);
+        Task DeletePost(decimal postId, decimal userId);
+        Task CreateComment(CommentRequest comment, decimal userId);
+        Task DeleteComment(decimal commentId, decimal userId);
 
         Task RejectPost(decimal postId);
         Task ApprovePost(decimal postId);
