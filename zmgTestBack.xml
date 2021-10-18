@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>zmgTestBack</name>
+    </assembly>
+    <members>
+        <member name="T:zmgTestBack.Services.IServiceHandler">
+            <summary>
+            An interface to perform the basic operations over the blog posts and comments.
+            </summary>
+        </member>
+    </members>
+</doc>
