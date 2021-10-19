@@ -25,7 +25,8 @@
    | :------- | :--------: | -------: |
    | Editor   |   HireMe   |    dunno |
    | Writer   | LoveZemoga |    dunno |
-   | Viewer   |   Viewer   |    dunno |
+   | Viewer   |   Viewer   |    dunno |/
+
    
    ![](https://i.imgur.com/wXdMvnE.png)
 
