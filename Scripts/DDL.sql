@@ -1,0 +1,198 @@
+/****** Object:  Database [ZmgTestDb]    Script Date: 18/10/2021 9:36:31 p. m. ******/
+CREATE DATABASE [ZmgTestDb]
+ 
+ALTER DATABASE [ZmgTestDb] SET COMPATIBILITY_LEVEL = 100
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [ZmgTestDb].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [ZmgTestDb] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [ZmgTestDb] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [ZmgTestDb] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [ZmgTestDb] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [ZmgTestDb] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [ZmgTestDb] SET  MULTI_USER 
+GO
+ALTER DATABASE [ZmgTestDb] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [ZmgTestDb] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [ZmgTestDb] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [ZmgTestDb] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [ZmgTestDb] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [ZmgTestDb] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+ALTER DATABASE [ZmgTestDb] SET QUERY_STORE = OFF
+GO
+USE [ZmgTestDb]
+GO
+/****** Object:  Table [dbo].[comments]    Script Date: 18/10/2021 9:36:31 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[comments](
+	[comment_id] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[contents] [varchar](500) NULL,
+	[creation_user] [numeric](18, 0) NOT NULL,
+	[creation_date] [datetime] NOT NULL,
+	[is_review] [bit] NOT NULL,
+	[post_id] [numeric](18, 0) NOT NULL,
+	[likes] [numeric](18, 0) NULL,
+	[dislikes] [numeric](18, 0) NULL,
+	[status] [int] NOT NULL,
+ CONSTRAINT [PK_comments] PRIMARY KEY CLUSTERED 
+(
+	[comment_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[posts]    Script Date: 18/10/2021 9:36:31 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[posts](
+	[post_id] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[title] [varchar](200) NOT NULL,
+	[contents] [varchar](max) NOT NULL,
+	[creation_user] [numeric](18, 0) NOT NULL,
+	[modification_user] [numeric](18, 0) NULL,
+	[creation_date] [datetime] NOT NULL,
+	[modification_date] [datetime] NULL,
+	[views] [numeric](18, 0) NULL,
+	[status] [int] NOT NULL,
+	[likes] [numeric](18, 0) NULL,
+	[dislikes] [numeric](18, 0) NULL,
+ CONSTRAINT [PK_posts] PRIMARY KEY CLUSTERED 
+(
+	[post_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[roles]    Script Date: 18/10/2021 9:36:31 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[roles](
+	[role_id] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[role_name] [varchar](50) NOT NULL,
+ CONSTRAINT [PK_roles] PRIMARY KEY CLUSTERED 
+(
+	[role_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[users]    Script Date: 18/10/2021 9:36:31 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[users](
+	[user_id] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[name] [varchar](100) NOT NULL,
+	[username] [varchar](50) NOT NULL,
+	[password] [varchar](200) NOT NULL,
+	[email] [varchar](50) NOT NULL,
+ CONSTRAINT [PK_users] PRIMARY KEY CLUSTERED 
+(
+	[user_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[users_roles]    Script Date: 18/10/2021 9:36:31 p. m. ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[users_roles](
+	[users_roles_id] [numeric](18, 0) IDENTITY(1,1) NOT NULL,
+	[user_id] [numeric](18, 0) NOT NULL,
+	[role_id] [numeric](18, 0) NOT NULL,
+ CONSTRAINT [PK_users_roles] PRIMARY KEY CLUSTERED 
+(
+	[users_roles_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[comments] ADD  CONSTRAINT [DF_comments_is_review]  DEFAULT ((0)) FOR [is_review]
+GO
+ALTER TABLE [dbo].[comments]  WITH CHECK ADD  CONSTRAINT [comments_posts_FK] FOREIGN KEY([post_id])
+REFERENCES [dbo].[posts] ([post_id])
+GO
+ALTER TABLE [dbo].[comments] CHECK CONSTRAINT [comments_posts_FK]
+GO
+ALTER TABLE [dbo].[comments]  WITH CHECK ADD  CONSTRAINT [comments_users_FK] FOREIGN KEY([creation_user])
+REFERENCES [dbo].[users] ([user_id])
+GO
+ALTER TABLE [dbo].[comments] CHECK CONSTRAINT [comments_users_FK]
+GO
+ALTER TABLE [dbo].[posts]  WITH CHECK ADD  CONSTRAINT [posts_users_2_FK] FOREIGN KEY([modification_user])
+REFERENCES [dbo].[users] ([user_id])
+GO
+ALTER TABLE [dbo].[posts] CHECK CONSTRAINT [posts_users_2_FK]
+GO
+ALTER TABLE [dbo].[posts]  WITH CHECK ADD  CONSTRAINT [posts_users_FK] FOREIGN KEY([creation_user])
+REFERENCES [dbo].[users] ([user_id])
+GO
+ALTER TABLE [dbo].[posts] CHECK CONSTRAINT [posts_users_FK]
+GO
+ALTER TABLE [dbo].[users_roles]  WITH CHECK ADD  CONSTRAINT [users_roles_roles_FK] FOREIGN KEY([role_id])
+REFERENCES [dbo].[roles] ([role_id])
+GO
+ALTER TABLE [dbo].[users_roles] CHECK CONSTRAINT [users_roles_roles_FK]
+GO
+ALTER TABLE [dbo].[users_roles]  WITH CHECK ADD  CONSTRAINT [users_roles_users_FK] FOREIGN KEY([user_id])
+REFERENCES [dbo].[users] ([user_id])
+GO
+ALTER TABLE [dbo].[users_roles] CHECK CONSTRAINT [users_roles_users_FK]
+GO
+ALTER DATABASE [ZmgTestDb] SET  READ_WRITE 
+GO

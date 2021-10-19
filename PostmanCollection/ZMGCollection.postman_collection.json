@@ -1,0 +1,637 @@
+{
+	"info": {
+		"_postman_id": "9fe8ff14-8299-47e9-af86-f339ef26b140",
+		"name": "ZMGCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "AuthToken",
+			"item": [
+				{
+					"name": "LoginWriter",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"pm.environment.unset(\"resultValue\");\r",
+									"pm.environment.set(\"authToken\", jsonData[\"token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/Login?Username=LoveZemoga&Password=dunno",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"Login"
+							],
+							"query": [
+								{
+									"key": "Username",
+									"value": "LoveZemoga"
+								},
+								{
+									"key": "Password",
+									"value": "dunno"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LoginViewer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"pm.environment.unset(\"authToken\");\r",
+									"pm.environment.set(\"authToken\", jsonData[\"token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/Login?Username=Viewer&Password=dunno",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"Login"
+							],
+							"query": [
+								{
+									"key": "Username",
+									"value": "Viewer"
+								},
+								{
+									"key": "Password",
+									"value": "dunno"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LoginEditor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"pm.environment.unset(\"authToken\");\r",
+									"pm.environment.set(\"authToken\", jsonData[\"token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{authUrl}}/Login?Username=HireMe&Password=dunno",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"Login"
+							],
+							"query": [
+								{
+									"key": "Username",
+									"value": "HireMe"
+								},
+								{
+									"key": "Password",
+									"value": "dunno"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PostsOperations",
+			"item": [
+				{
+					"name": "CreatePost",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Title Test\",\r\n    \"contents\": \"Content Test Yeah\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/createPost",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"createPost"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateComment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"contents\": \"This comment is not a test review\",\r\n    \"postId\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/CreateComment",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"CreateComment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetPostById",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/getPost/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"getPost",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAllPosts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/getPosts",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"getPosts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetPendingPosts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/getPendingPosts",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"getPendingPosts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdatePost",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"postId\": 1,\r\n    \"title\": \"Title Test 2\",\r\n    \"contents\": \"Content Test 2 Yeah man\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/updatePost",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"updatePost"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RejectPost",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"postId\": 2,\r\n    \"title\": \"Title Test 2\",\r\n    \"contents\": \"Content Test 2 Yeah\",\r\n    \"modificationUserId\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/rejectPost/2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"rejectPost",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApprovePost",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"postId\": 2,\r\n    \"title\": \"Title Test 2\",\r\n    \"contents\": \"Content Test 2 Yeah\",\r\n    \"modificationUserId\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/approvePost/2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"approvePost",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LikePost",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"postId\": 2,\r\n    \"title\": \"Title Test 2\",\r\n    \"contents\": \"Content Test 2 Yeah\",\r\n    \"modificationUserId\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/likePost/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"likePost",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DislikePost",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"postId\": 2,\r\n    \"title\": \"Title Test 2\",\r\n    \"contents\": \"Content Test 2 Yeah\",\r\n    \"modificationUserId\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/dislikePost/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dislikePost",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LikeComment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"postId\": 2,\r\n    \"title\": \"Title Test 2\",\r\n    \"contents\": \"Content Test 2 Yeah\",\r\n    \"modificationUserId\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/likeComment/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"likeComment",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DislikeComment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"postId\": 2,\r\n    \"title\": \"Title Test 2\",\r\n    \"contents\": \"Content Test 2 Yeah\",\r\n    \"modificationUserId\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/dislikeComment/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dislikeComment",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeletePost",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/deletePost/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"deletePost",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteComment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/deleteComment/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"deleteComment",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -31,7 +31,8 @@ namespace zmgTestBack.Controllers
         public async Task<IActionResult> GetPostById(decimal postId)
         {
             decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _serviceHandler.GetPostById(postId, userId);
+            bool isEditor = User.IsInRole(RolesConstants.Editor);
+            var result = await _serviceHandler.GetPostById(postId, userId, isEditor);
             return Ok(result);
         }
 
@@ -96,7 +97,8 @@ namespace zmgTestBack.Controllers
         [Authorize(Roles = RolesConstants.Editor)]
         public async Task<IActionResult> RejectPost(decimal postId)
         {
-            await _serviceHandler.RejectPost(postId);
+            decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _serviceHandler.RejectPost(postId, userId);
             GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Reject, nameof(Post)));
             return Ok(response);
         }
@@ -104,7 +106,8 @@ namespace zmgTestBack.Controllers
         [Authorize(Roles = RolesConstants.Editor)]
         public async Task<IActionResult> ApprovePost(decimal postId)
         {
-            await _serviceHandler.ApprovePost(postId);
+            decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _serviceHandler.ApprovePost(postId, userId);
             GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Approve, nameof(Post)));
             return Ok(response);
         }
@@ -145,11 +148,12 @@ namespace zmgTestBack.Controllers
 
         #region DELETE
         [HttpDelete("deletePost/{postId}")]
-        [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor + "," + RolesConstants.Viewer)]
+        [Authorize(Roles = RolesConstants.Writer + "," + RolesConstants.Editor)]
         public async Task<IActionResult> DeletePost(decimal postId)
         {
             decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            await _serviceHandler.DeletePost(postId, userId);
+            bool isEditor = User.IsInRole(RolesConstants.Editor);
+            await _serviceHandler.DeletePost(postId, userId, isEditor);
             GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Delete, nameof(Post)));
             return Ok(response);
         }
@@ -158,7 +162,8 @@ namespace zmgTestBack.Controllers
         public async Task<IActionResult> DeleteComment(decimal commentId)
         {
             decimal userId = decimal.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            await _serviceHandler.DeleteComment(commentId, userId);
+            bool isEditor = User.IsInRole(RolesConstants.Editor);
+            await _serviceHandler.DeleteComment(commentId, userId, isEditor);
             GenericResponse response = new GenericResponse((int)HttpStatusCode.OK, string.Format(ResponseConstants.Delete, nameof(Comment)));
             return Ok(response);
         }

@@ -16,12 +16,14 @@ namespace zmgTestBack.Services
             _dbContext = dbContext;
         }
 
-        public async Task ApprovePost(decimal postId)
+        public async Task ApprovePost(decimal postId, decimal userId)
         {
-            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == postId && x.Status == (int)StatusEnums.PendingApproval);
+            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == postId 
+            && x.Status == (int)StatusEnums.PendingApproval);
             if (postToUpdate == null)
                 throw new ArgumentNullException(String.Format("The post with the id: {0} doesn't exist or can't be Approved", postId));
             postToUpdate.ModificationDate = DateTime.UtcNow;
+            postToUpdate.ModificationUserId = userId;
             postToUpdate.Status = (int)StatusEnums.Published;
             _dbContext.Posts.Update(postToUpdate);
             await _dbContext.SaveChangesAsync();
@@ -30,14 +32,17 @@ namespace zmgTestBack.Services
         public async Task CreateComment(CommentRequest comment, decimal userId)
         {
             int repeatedComments = _dbContext.Comments
-                .Where(x => x.Status == (int)StatusEnums.Published && x.PostId == comment.PostId && x.CreationUser.UserId == userId && x.Contents == comment.Contents).Count();
+                .Where(x => x.Status == (int)StatusEnums.Published 
+                && x.PostId == comment.PostId 
+                && x.CreationUser.UserId == userId 
+                && x.Contents == comment.Contents).Count();
             Post post = _dbContext.Posts
                 .SingleOrDefault(x => x.PostId == comment.PostId);
-            User user = _dbContext.Users
+            User user = _dbContext.Users.Include("UsersRoles")
                 .SingleOrDefault(x => x.UserId == userId);
             if (repeatedComments > 2)
                 throw new DuplicateWaitObjectException("This comment couldn't be posted because you have already posted the same comment several times before.");
-            if(post == null)
+            if(post == null || (post.Status != (int)StatusEnums.Published && !user.UsersRoles.Any(x => x.RoleId == (int)RolesEnums.Editor)))
                 throw new ArgumentNullException("The post where you are trying to comment does not exist");
             Comment commentToSave = new Comment()
             {
@@ -73,10 +78,12 @@ namespace zmgTestBack.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task DeleteComment(decimal commentId, decimal userId)
+        public async Task DeleteComment(decimal commentId, decimal userId, bool isEditor)
         {
             Comment commentToDisable = _dbContext.Comments
-                .SingleOrDefault(x => x.CommentId == commentId && x.Status == (int)StatusEnums.Published);
+                .SingleOrDefault(x => x.CommentId == commentId 
+                && x.Status == (int)StatusEnums.Published
+                &&(isEditor || x.CreationUserId == userId));
             if (commentToDisable == null)
                 throw new ArgumentNullException(String.Format("The comment you are trying to delete does not exist"));
             commentToDisable.Status = (int)StatusEnums.Deleted;
@@ -84,10 +91,12 @@ namespace zmgTestBack.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task DeletePost(decimal postId, decimal userId)
+        public async Task DeletePost(decimal postId, decimal userId, bool isEditor)
         {
             Post postToDisable = _dbContext.Posts
-                .SingleOrDefault(x => x.PostId == postId && x.Status != (int)StatusEnums.Deleted);
+                .SingleOrDefault(x => x.PostId == postId 
+                && x.Status != (int)StatusEnums.Deleted
+                && (isEditor || x.CreationUserId == userId));
             if (postToDisable == null)
                 throw new ArgumentNullException(String.Format("The post you are trying to delete does not exist"));
             postToDisable.Status = (int)StatusEnums.Deleted;
@@ -97,7 +106,8 @@ namespace zmgTestBack.Services
 
         public async Task DislikeComment(decimal commentId)
         {
-            Comment commentToUpdate = await _dbContext.Comments.SingleOrDefaultAsync(x => x.CommentId == commentId && x.Status == (int)StatusEnums.Published);
+            Comment commentToUpdate = await _dbContext.Comments.SingleOrDefaultAsync(x => x.CommentId == commentId 
+            && x.Status == (int)StatusEnums.Published);
             if (commentToUpdate == null)
                 throw new ArgumentNullException(String.Format("The comment with the id: {0} doesn't exist", commentId));
             commentToUpdate.Dislikes += 1;
@@ -107,7 +117,8 @@ namespace zmgTestBack.Services
 
         public async Task DislikePost(decimal postId)
         {
-            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == postId && x.Status == (int)StatusEnums.Published);
+            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == postId 
+            && x.Status == (int)StatusEnums.Published);
             if (postToUpdate == null)
                 throw new ArgumentNullException(String.Format("The post with the id: {0} doesn't exist or can't be Approved", postId));
             postToUpdate.Dislikes += 1;
@@ -160,17 +171,20 @@ namespace zmgTestBack.Services
                 .ToListAsync();
         }
 
-        public async Task<Post> GetPostById(decimal postId, decimal userId)
+        public async Task<Post> GetPostById(decimal postId, decimal userId, bool isEditor)
         {
             Post post = _dbContext.Posts
                 .Include(x => x.Comments.Where(y => !y.IsReview && y.Status == (int)StatusEnums.Published))
                 .Include("Comments.CreationUser")
                 .Include("CreationUser")
-                .SingleOrDefault(x => x.PostId == postId && ((x.CreationUserId != userId && x.Status == (int)StatusEnums.Published) || x.CreationUserId == userId));
+                .SingleOrDefault(x => x.PostId == postId && ((x.CreationUserId != userId 
+                && x.Status == (int)StatusEnums.Published) 
+                || (x.CreationUserId == userId 
+                || isEditor)));
             if (post == null)
                 throw new ArgumentNullException(String.Format("There is no post with the id: {0}", postId));
 
-            if (post.CreationUserId == userId)
+            if (post.CreationUserId == userId || isEditor)
             {
                post.Comments.Concat(await _dbContext.Comments.Include("CreationUser").Where(x => x.IsReview && x.Status == (int)StatusEnums.Published).ToListAsync());
             }
@@ -228,9 +242,11 @@ namespace zmgTestBack.Services
 
         public async Task LikeComment(decimal commentId)
         {
-            Comment commentToUpdate = await _dbContext.Comments.SingleOrDefaultAsync(x => x.CommentId == commentId && x.Status == (int)StatusEnums.Published);
+            Comment commentToUpdate = await _dbContext.Comments.SingleOrDefaultAsync(x => x.CommentId == commentId 
+            && x.Status == (int)StatusEnums.Published
+            && x.Post.Status == (int)StatusEnums.Published);
             if (commentToUpdate == null)
-                throw new ArgumentNullException(String.Format("The comment with the id: {0} doesn't exist", commentId));
+                throw new ArgumentNullException(String.Format("The comment with the id: {0} doesn't exist or the post with the comment does not exist", commentId));
             commentToUpdate.Likes += 1;
             _dbContext.Comments.Update(commentToUpdate);
             await _dbContext.SaveChangesAsync();
@@ -238,7 +254,8 @@ namespace zmgTestBack.Services
 
         public async Task LikePost(decimal postId)
         {
-            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == postId && x.Status == (int)StatusEnums.Published);
+            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == postId 
+            && x.Status == (int)StatusEnums.Published);
             if (postToUpdate == null)
                 throw new ArgumentNullException(String.Format("The post with the id: {0} doesn't exist", postId));
             postToUpdate.Likes += 1;
@@ -246,12 +263,14 @@ namespace zmgTestBack.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task RejectPost(decimal postId)
+        public async Task RejectPost(decimal postId, decimal userId)
         {
-            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == postId && x.Status == (int)StatusEnums.PendingApproval);
+            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.PostId == postId 
+            && x.Status == (int)StatusEnums.PendingApproval);
             if (postToUpdate == null)
                 throw new ArgumentNullException(String.Format("The post with the id: {0} doesn't exist or can't be Rejected", postId));
             postToUpdate.ModificationDate = DateTime.UtcNow;
+            postToUpdate.ModificationUserId = userId;
             postToUpdate.Status = (int)StatusEnums.Rejected;
             _dbContext.Posts.Update(postToUpdate);
             await _dbContext.SaveChangesAsync();
@@ -259,7 +278,9 @@ namespace zmgTestBack.Services
 
         public async Task UpdatePost(PostRequest post, decimal userId)
         {
-            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.CreationUserId == userId && x.PostId == post.PostId && x.Status == (int)StatusEnums.Rejected);
+            Post postToUpdate = await _dbContext.Posts.SingleOrDefaultAsync(x => x.CreationUserId == userId 
+            && x.PostId == post.PostId 
+            && x.Status == (int)StatusEnums.Rejected);
             if(postToUpdate == null)
                 throw new ArgumentNullException(String.Format("The post with the id: {0} doesn't exist or can't be modified", post.PostId));
             postToUpdate.Title = post.Title;
