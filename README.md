@@ -26,6 +26,7 @@
    | Editor   |   HireMe   |    dunno |
    | Writer   | LoveZemoga |    dunno |
    | Viewer   |   Viewer   |    dunno |
+   
    ![](https://i.imgur.com/wXdMvnE.png)
 
 4. Use generated JWT token to authenticate to use the Blog specific Methods.
